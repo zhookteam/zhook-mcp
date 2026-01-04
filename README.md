@@ -4,6 +4,7 @@ The official Model Context Protocol (MCP) server for [zhook](https://zhook.dev),
 
 ## Features
 
+- **Create Hooks**: Create new webhooks or MQTT hooks directly from your agent.
 - **List Hooks**: Retrieve a list of your configured webhooks.
 - **Inspect Events**: View recent events for a specific hook.
 - **Wait for Event**: Pause execution and wait for a specific event to occur.
@@ -48,7 +49,7 @@ zhook-mcp
 
 ## Configuration
 
-The server requires a Zhook API key to authenticate requests. You can obtain this key from your Zhook dashboard.
+The server requires a Zhook API key to authenticate requests. You can obtain this key from your Zhook dashboard in the user settings page.
 
 | Environment Variable | Description | Required |
 |----------------------|-------------|----------|
