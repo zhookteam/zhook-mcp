@@ -1,0 +1,53 @@
+{
+  "name": "@zhook/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Zhook - Manage webhooks and inspect events from your AI agent",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "zhook-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "zhook",
+    "webhook",
+    "ai",
+    "agent",
+    "llm",
+    "claude",
+    "chatgpt"
+  ],
+  "author": "Zhook",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhookteam/zhook-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://zhook.dev",
+  "bugs": {
+    "url": "https://github.com/zhookteam/zhook-mcp/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1",
+    "@zhook/client": "^1.0.0",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.25.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
