@@ -1,6 +1,6 @@
 # @zhook/mcp-server
 
-The official Model Context Protocol (MCP) server for [Zhook](https://zhook.dev), enabling AI agents to interact with your Zhook webhooks, events, and metrics.
+The official Model Context Protocol (MCP) server for [zhook](https://zhook.dev), enabling AI agents to interact with your Zhook webhooks, events, and metrics.
 
 ## Features
 
@@ -56,9 +56,33 @@ The server requires a Zhook API key to authenticate requests. You can obtain thi
 
 ## Tools
 
-- `zhook_list_hooks`: List all available hooks in your account.
-- `zhook_get_events`: Get recent events for a hook.
-- `zhook_wait_for_event`: Wait for a specific event trigger.
+### Hooks
+- `zhook_list_hooks`: List all webhooks configured in the Zhook account.
+- `zhook_get_hook`: Get detailed configuration for a specific webhook.
+- `zhook_create_hook`: Create a new webhook or MQTT hook.
+- `zhook_trigger_webhook`: Send a test webhook event to a specific Hook.
+
+### Events
+- `zhook_list_events`: List recent events received by a specific hook.
+- `zhook_get_event`: Get the full JSON payload and details of a specific event.
+- `zhook_wait_for_event`: Connects to the Zhook WebSocket and waits for the NEXT event to arrive.
+
+### Destinations
+- `zhook_list_destinations`: List all destinations configured for a specific webhook.
+- `zhook_get_destination`: Get detailed configuration for a specific destination.
+- `zhook_create_destination`: Add a new destination to a hook.
+- `zhook_update_destination`: Update an existing destination's configuration.
+- `zhook_delete_destination`: Remove a destination from a hook.
+
+### Transformations
+- `zhook_list_transformations`: List all transformations configured for a specific webhook.
+- `zhook_create_transformation`: Create a new JSONata transformation for a hook.
+- `zhook_update_transformation`: Update an existing transformation.
+- `zhook_delete_transformation`: Delete a transformation from a hook.
+
+### Metrics
+- `zhook_get_hook_metrics`: Get real-time metrics (request counts, success/failure rates).
+- `zhook_get_aggregated_hook_metrics`: Get historical aggregated metrics with custom date ranges.
 
 ## Usage in Editors & Tools
 
