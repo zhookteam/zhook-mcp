@@ -1,11 +1,11 @@
 {
   "name": "@zhook/mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP Server for Zhook - Manage webhooks and inspect events from your AI agent",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "zhook-mcp": "./dist/index.js"
+    "zhook-mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
