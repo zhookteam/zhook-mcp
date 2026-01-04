@@ -60,6 +60,18 @@ The server requires a Zhook API key to authenticate requests. You can obtain thi
 - `zhook_get_events`: Get recent events for a hook.
 - `zhook_wait_for_event`: Wait for a specific event trigger.
 
+## Usage in Editors & Tools
+
+### VSCode
+1. Open the Command Palette (**Ctrl+Shift+P**).
+2. Type and select **"MCP Servers"** (or configured extension command).
+3. Add the server configuration as shown above.
+
+### Antigravity (Agent)
+1. Click the **"..." (More Options)** menu in the top-right toolbar.
+2. Select **"MCP Servers"**.
+3. Add the server configuration (Name: `zhook`, Command: `npx`, Args: `-y @zhook/mcp-server`, Env: `ZHOOK_API_KEY=...`).
+
 ## License
 
 ISC
