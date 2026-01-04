@@ -69,7 +69,7 @@ The server requires a Zhook API key to authenticate requests. You can obtain thi
 
 ### Antigravity (Agent)
 1. Click the **"..." (More Options)** menu in the top-right toolbar.
-2. Select **"MCP Servers"**.
+2. Select **"MCP Servers"** and then **"Manage MCP Servers"**.
 3. Add the server configuration (Name: `zhook`, Command: `npx`, Args: `-y @zhook/mcp-server`, Env: `ZHOOK_API_KEY=...`).
 
 ## License
