@@ -42,6 +42,8 @@ COPY --from=builder /app/dist ./dist
 # Zhook MCP seems to use StdioServerTransport in index.ts, so no EXPOSE strictly needed for stdio,
 # but mcp-proxy might need it? 
 # Glama's error log showed: CMD ["mcp-proxy","node","dist/index.js"] 
-# So we should probably stick to a simple CMD or let Glama override it.
-# We will set a default CMD that runs the server.
-CMD ["node", "dist/index.js"]
+# So we run npm install -g mcp-proxy and use it in CMD.
+
+RUN npm install -g mcp-proxy@6.2.0
+
+CMD ["mcp-proxy", "node", "dist/index.js"]
