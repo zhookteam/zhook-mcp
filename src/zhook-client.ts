@@ -9,30 +9,38 @@ dotenv.config();
 
 // Zhook API Client
 export class ZhookClient {
-    private client: AxiosInstance;
+    private client: AxiosInstance | null = null;
+    private apiKey: string | undefined;
 
     constructor() {
-        const apiKey = process.env.ZHOOK_API_KEY;
-        if (!apiKey) {
-            throw new Error('ZHOOK_API_KEY environment variable is required');
+        // Defer validation - allow server to start for tool discovery
+        this.apiKey = process.env.ZHOOK_API_KEY;
+    }
+
+    private ensureClient(): AxiosInstance {
+        if (!this.apiKey) {
+            throw new Error('ZHOOK_API_KEY environment variable is required. Please set it in your MCP client configuration.');
         }
 
-        const baseURL = process.env.ZHOOK_API_URL || 'https://api.zhook.dev/api/v1';
-
-        this.client = axios.create({
-            baseURL,
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'User-Agent': 'zhook-mcp-server/1.0.0'
-            }
-        });
+        if (!this.client) {
+            const baseURL = process.env.ZHOOK_API_URL || 'https://api.zhook.dev/api/v1';
+            this.client = axios.create({
+                baseURL,
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'zhook-mcp-server/1.0.0'
+                }
+            });
+        }
+        return this.client;
     }
 
     // Generic request wrapper
     async request<T>(method: string, url: string, data?: any, params?: any): Promise<T> {
         try {
-            const response = await this.client.request<T>({
+            const client = this.ensureClient();
+            const response = await client.request<T>({
                 method,
                 url,
                 data,
@@ -143,6 +151,7 @@ export class ZhookClient {
     // Webhooks (Testing)
     async triggerWebhook(hookId: string, payload: any, contentType: string = 'application/json') {
         console.error(`[ZhookClient] triggerWebhook called with hookId: ${hookId}, payload: ${JSON.stringify(payload)}`);
+        const client = this.ensureClient();
         const config = {
             headers: {
                 'Content-Type': contentType
@@ -153,10 +162,10 @@ export class ZhookClient {
         // /hooks/:id is primarily for GET (details) or requires correct routing in server.js.
         // The user confirmed /h/:id is the correct path for POSTing webhooks.
 
-        const baseUrl = this.client.defaults.baseURL || '';
+        const baseUrl = client.defaults.baseURL || '';
         const rootUrl = baseUrl.replace(/\/api\/v1\/?$/, '');
 
         // Use the short URL /h/:id
-        return this.client.post(`${rootUrl}/h/${hookId}`, payload, config);
+        return client.post(`${rootUrl}/h/${hookId}`, payload, config);
     }
 }
