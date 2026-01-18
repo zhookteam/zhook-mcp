@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ZhookClient } from '../zhook-client.js';
-import { ZhookClient as RealtimeClient } from '@zhook/client';
+// import { ZhookClient as RealtimeClient } from '@zhook/client';
 
 const apiClient = new ZhookClient();
 
@@ -82,9 +82,21 @@ export const waitForEventTool = {
             console.error("Failed to fetch hook details for key lookup, using API Key", err);
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             // Initialize Realtime Client
             // Corrected usage: RealtimeClient(clientKey, options)
+            let RealtimeClient;
+            try {
+                const pkg = await import('@zhook/client');
+                RealtimeClient = pkg.ZhookClient;
+            } catch (e) {
+                // Dynamically import failed
+                resolve({
+                    content: [{ type: "text", text: "Error loading client library: " + (e as any).message }]
+                });
+                return;
+            }
+
             const realtime = new RealtimeClient(clientKey, {
                 wsUrl: wsUrl,
                 project: 'default'

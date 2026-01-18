@@ -1,0 +1,582 @@
+{
+  "name": "zhook-mcp-server",
+  "version": "1.0.1",
+  "description": "MCP Server for Zhook - Manage webhooks and inspect events from your AI agent",
+  "tools": [
+    {
+      "name": "trigger_webhook",
+      "description": "Send a test webhook event to a specific Hook. This mimics a real third-party service sending data to the hook URL.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook to trigger (preferred)"
+          },
+          "hook_id": {
+            "type": "string",
+            "description": "Alias for hookId"
+          },
+          "payload": {
+            "type": "string",
+            "description": "The payload to send. Can be a JSON object, a JSON string, or just plain text."
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "application/json",
+              "text/plain"
+            ],
+            "default": "application/json",
+            "description": "Content-Type of the webhook (default: application/json)"
+          }
+        },
+        "required": [
+          "payload"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_hooks",
+      "description": "List all webhooks configured in the Zhook account. Returns hook IDs, URLs, and active status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_hook",
+      "description": "Create a new webhook or MQTT hook. Returns the new hook ID and its public URL.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "mqtt"
+            ],
+            "default": "standard",
+            "description": "The type of hook to create. Use 'mqtt' to create an MQTT source hook."
+          },
+          "deliveryMethod": {
+            "type": "string",
+            "enum": [
+              "http",
+              "websocket",
+              "both"
+            ],
+            "default": "websocket",
+            "description": "How you want to receive events. Defaults to 'websocket' for easy testing."
+          },
+          "callbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Required if deliveryMethod is 'http' or 'both'."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Optional key-value metadata to attach to the hook (name, tags)."
+          },
+          "sourceConfig": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "type": "string",
+                "description": "MQTT Topic to subscribe to (required for type=mqtt)"
+              },
+              "brokerUrl": {
+                "type": "string",
+                "description": "MQTT Broker URL"
+              },
+              "username": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "topic"
+            ],
+            "additionalProperties": false,
+            "description": "Configuration for MQTT source. Required if type is 'mqtt'."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_hook",
+      "description": "Get detailed configuration for a specific webhook, including delivery URL, metadata, and recent metrics.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook to retrieve (e.g. hook_abc123)"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_destinations",
+      "description": "List all destinations configured for a specific webhook.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook to list destinations for"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_destination",
+      "description": "Add a new destination to a hook to forward events to.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "http",
+              "mqtt",
+              "email"
+            ],
+            "description": "Type of destination"
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "description": "Target URL (HTTP only)"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH"
+                ],
+                "default": "POST",
+                "description": "HTTP Method"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "HTTP Headers"
+              },
+              "brokerUrl": {
+                "type": "string",
+                "description": "MQTT Broker URL (e.g., mqtt://broker.hivemq.com)"
+              },
+              "topic": {
+                "type": "string",
+                "description": "MQTT Topic"
+              },
+              "qos": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2,
+                "default": 0
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Email address to send to"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Configuration object specific to the destination type"
+          },
+          "name": {
+            "type": "string",
+            "description": "Friendly name for this destination"
+          }
+        },
+        "required": [
+          "hookId",
+          "type",
+          "config"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_destination",
+      "description": "Get detailed configuration for a specific destination.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook"
+          },
+          "destinationId": {
+            "type": "string",
+            "description": "The ID of the destination"
+          }
+        },
+        "required": [
+          "hookId",
+          "destinationId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_destination",
+      "description": "Update an existing destination's configuration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string"
+          },
+          "destinationId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "http",
+              "mqtt",
+              "email"
+            ],
+            "description": "Type of destination"
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "description": "Target URL (HTTP only)"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH"
+                ],
+                "default": "POST",
+                "description": "HTTP Method"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "HTTP Headers"
+              },
+              "brokerUrl": {
+                "type": "string",
+                "description": "MQTT Broker URL (e.g., mqtt://broker.hivemq.com)"
+              },
+              "topic": {
+                "type": "string",
+                "description": "MQTT Topic"
+              },
+              "qos": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2,
+                "default": 0
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Email address to send to"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Configuration object specific to the destination type"
+          },
+          "name": {
+            "type": "string",
+            "description": "Friendly name for this destination"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Enable or disable this destination"
+          }
+        },
+        "required": [
+          "hookId",
+          "destinationId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_destination",
+      "description": "Remove a destination from a hook.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string"
+          },
+          "destinationId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "hookId",
+          "destinationId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_transformations",
+      "description": "List all transformations configured for a specific webhook.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_transformation",
+      "description": "Create a new JSONata transformation for a hook.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the transformation"
+          },
+          "code": {
+            "type": "string",
+            "description": "JSONata transformation code"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "hookId",
+          "name",
+          "code"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_transformation",
+      "description": "Update an existing transformation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string"
+          },
+          "transformationId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the transformation"
+          },
+          "code": {
+            "type": "string",
+            "description": "JSONata transformation code"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "hookId",
+          "transformationId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "delete_transformation",
+      "description": "Delete a transformation from a hook.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string"
+          },
+          "transformationId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "hookId",
+          "transformationId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_hook_metrics",
+      "description": "Get real-time metrics for a specific hook (request counts, success/failure rates).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook"
+          },
+          "timeWindow": {
+            "type": "string",
+            "enum": [
+              "hour",
+              "day",
+              "week"
+            ],
+            "default": "hour",
+            "description": "Time window for metrics"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_aggregated_hook_metrics",
+      "description": "Get historical aggregated metrics for a specific hook with custom date ranges.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "ISO date string for start time"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "ISO date string for end time"
+          },
+          "groupBy": {
+            "type": "string",
+            "enum": [
+              "hour",
+              "day"
+            ],
+            "default": "hour",
+            "description": "Granularity of aggregation"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_events",
+      "description": "List recent events received by a specific hook. Useful for checking what payloads have been delivered.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The ID of the hook to inspect"
+          },
+          "limit": {
+            "type": "number",
+            "maximum": 50,
+            "default": 5,
+            "description": "Number of events to return (max 50, default 5)"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_event",
+      "description": "Get the full JSON payload and details of a specific event.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The hook ID"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "The event ID to retrieve"
+          }
+        },
+        "required": [
+          "hookId",
+          "eventId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "wait_for_event",
+      "description": "Connects to the Zhook WebSocket and waits for the NEXT event to arrive on a specific hook. Returns the full event payload immediately. TIMEOUT is 60 seconds.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "hookId": {
+            "type": "string",
+            "description": "The hook ID to watch"
+          },
+          "timeoutSeconds": {
+            "type": "number",
+            "default": 60,
+            "description": "How long to wait before giving up"
+          }
+        },
+        "required": [
+          "hookId"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

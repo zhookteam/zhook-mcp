@@ -13,7 +13,7 @@ export class ZhookClient {
     private apiKey: string | undefined;
 
     constructor() {
-        // Defer validation - allow server to start for tool discovery
+        // Initialize API key from environment
         this.apiKey = process.env.ZHOOK_API_KEY;
     }
 
